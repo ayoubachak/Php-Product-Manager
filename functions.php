@@ -127,10 +127,92 @@ function get_actions_for($id){
   return '
   <ul class="list-inline m-0">
     <li class="list-inline-item">
-        <button class="btn btn-success btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Edit" onclick="delete_product('.$id.')"><i class="fa fa-edit"></i></button>
+        <button class="btn btn-success btn-sm rounded-0" data-toggle="modal" data-target="#modalEditProduct" name="edit" type="button" data-placement="top" title="Edit" onclick="edit_product('.$id.')"><i class="fa fa-edit"></i></button>
     </li>
     <li class="list-inline-item">
-        <button class="btn btn-danger btn-sm rounded-0" type="button" data-toggle="tooltip" data-placement="top" title="Delete" onclick="delete_product('.$id.')"><i class="fa fa-trash"></i></button>
+        <button class="btn btn-danger btn-sm rounded-0" data-toggle="modal" data-target="#modalDeleteProduct" name="delete" type="button" data-placement="top" title="Delete" onclick="delete_product('.$id.')"><i class="fa fa-trash"></i></button>
     </li>
   </ul>';
+}
+
+function randomString($n){
+
+    $characters = '0123456789'.'abcdefghijklmnopqrstuvwxyz'.strtoupper('abcdefghijklmnopqrstuvwxyz');
+    $str = '';
+    for ($i =0 ; $i<$n; $i++){
+        $index = rand(0, strlen($characters)-1);
+        $str .= $characters[$index];
+    }
+    return $str;
+}
+
+// for products
+function get_all_categories(){
+  global $conn;
+  $stmt = $conn->prepare("SELECT * from categories");
+  $stmt->execute();
+  $result = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  return $result;
+}
+function show_all_categories(){
+  $product_categories = get_all_categories();
+  $str = '';
+  foreach($product_categories as $category){
+    $str.='
+    <option value="' . $category['id'].'">
+    '.ucfirst($category['name']).'
+    </option>
+    ';
+  }
+  return $str;
+
+}
+
+function insert_product($label, $price, $pdate, $picture, $id_category, $id_owner){
+  global $conn;
+  $response = array();
+  $stmt = $conn->prepare("INSERT INTO products (label, price, pdate, picture, id_category, id_owner) values (:label, :price, :pdate, :picture, :id_category, :id_owner )");
+  $stmt->bindParam(':label', $label);
+  $stmt->bindParam(':price', $price);
+  $stmt->bindParam(':pdate', $pdate);
+  $stmt->bindParam(':picture', $picture);
+  $stmt->bindParam(':id_category', $id_category);
+  $stmt->bindParam(':id_owner', $id_owner);
+  $status = $stmt->execute();
+  if($status){
+    $response = array(
+      "correct"=>true,
+      "msg"=>"The product was saved successfully!"
+    );
+  }else{
+    $response = array(
+      "correct"=>false,
+      "msg"=>"Something went wrong while saving the product"
+    );
+  }
+  return $response;
+}
+
+function get_current_user_products(){
+  global $conn;
+  $response = array();
+  $username = get_current_username();
+  $user = get_user_by_username($username);
+  $id_owner = $user['id'];
+  $stmt = $conn->prepare("SELECT * FROM products WHERE id_owner=:id_owner");
+  $stmt->bindParam(':id_owner', $id_owner);
+  $stmt->execute();
+  $result = $stmt->fetchAll(\PDO::FETCH_ASSOC);
+  return $result;
+}
+
+function get_category_by_id($id){
+  global $conn;
+  $response = array();
+  $stmt = $conn->prepare("SELECT * FROM categories WHERE id=:id");
+  $stmt->bindParam(':id', $id);
+  $stmt->execute();
+  $result = $stmt->fetch();
+  return $result;
+
 }

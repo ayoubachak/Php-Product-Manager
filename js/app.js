@@ -1,3 +1,25 @@
+// product forms handlers
+$('#add-product-form').submit(function(e) {
+  e.preventDefault();
+  var data = getFormData($(this));
+  var formData = new FormData();
+  formData.append('product-add-picture', $('#product-add-picture')[0].files[0]);
+  for(key in data) {
+      formData.append(key,data[key])
+  }
+  formData.append('action', 'add_product');
+  $.ajax({
+         url : 'api.php',
+         type : 'POST',
+         data : formData,
+         processData: false,  // tell jQuery not to process the data
+         contentType: false,  // tell jQuery not to set contentType
+         success : function(data) {
+             console.log(data);
+         }
+  });
+})
+
 function getFormData(form){
     var unindexed_array = form.serializeArray();
     var indexed_array = {};
@@ -29,10 +51,11 @@ function logout(){
   });
 }
 
+
 function delete_product(id){
 
 }
 
 function edit_product(id){
-  
+
 }
