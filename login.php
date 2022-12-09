@@ -1,4 +1,4 @@
-
+<?php require_once('functions.php'); ?>
 <html>
 <head>
     <title>Title</title>
@@ -11,11 +11,13 @@
     <div class="shape"></div>
 </div>
 <form id="login-form" action="/login" method="post">
+    <div class="error" style="color:red;text-align:center">
 
+    </div>
     <h3>Login Here</h3>
 
     <label for="username">Username<span style="color:red"> *</span></label>
-    <input type="text" placeholder="Email or Phone" id="username" name="login" required>
+    <input type="text" placeholder="Email or Phone" id="username" name="username" required>
 
     <label for="password">Password<span style="color:red"> *</span></label>
     <input type="password" placeholder="Password" id="password" name="password" required>
@@ -32,7 +34,24 @@
 $("#login-form").submit(function (e){
   e.preventDefault(); // prevent the default action for the form
   var values = getFormData($(this)); // the form values
-   
+  values.action = "login";
+  console.log(values);
+  $.ajax('api.php', {
+      type: 'POST',  // http method
+      data: values,  // data to submit
+      success: function (data, status, xhr) {
+          var data=JSON.parse(data);
+          console.log(data);
+          if(data.correct) {
+              window.location.href = "/";
+          }else{
+            $(".error").html(data.msg);
+          }
+      },
+      error: function (jqXhr, textStatus, errorMessage) {
+              console.log('Error' + errorMessage);
+      }
+  });
 })
 
 </script>

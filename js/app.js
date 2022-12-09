@@ -8,15 +8,31 @@ function getFormData(form){
 
     return indexed_array;
 }
-$.ajax('api/login.php', {
-    type: 'POST',  // http method
 
-    data: { myData: 'This is my data.'},  // data to submit
-    action:'test',
-    success: function (data, status, xhr) {
-        console.log('status: ' + status + ', data: ' + data);
-    },
-    error: function (jqXhr, textStatus, errorMessage) {
-            console.log('Error' + errorMessage);
-    }
-});
+function logout(){
+  var data = {
+    action:"logout"
+  }
+  $.ajax('api.php', {
+      type: 'POST',  // http method
+      data: data,  // data to submit
+      success: function (data, status, xhr) {
+          var data=JSON.parse(data);
+          console.log(data);
+          if(data.correct) {
+              window.location.href = "/";
+          }
+      },
+      error: function (jqXhr, textStatus, errorMessage) {
+              console.log('Error' + errorMessage);
+      }
+  });
+}
+
+function delete_product(id){
+
+}
+
+function edit_product(id){
+  
+}

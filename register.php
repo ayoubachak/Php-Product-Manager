@@ -1,3 +1,5 @@
+<?php require_once('functions.php'); ?>
+
 <html>
 <head>
     <title>Title</title>
@@ -9,34 +11,36 @@
     <div class="shape"></div>
     <div class="shape"></div>
 </div>
-<form action="/registration" method="post">
+<form id="registration-form" action="/registration" method="post">
+    <div class="error" style="color:red;text-align:center">
 
+    </div>
     <h3>Create Account</h3>
 
     <div class="form-elements">
         <div class="form-input half-input">
-            <label for="fname" class="form-label">First Name</label>
-            <input type="text" id="fname" name="fname" class="form-control" >
+            <label for="firstname" class="form-label">First Name<span style="color:red"> *</span></label>
+            <input type="text" id="firstname" name="firstname" class="form-control" required>
         </div>
         <div class="form-input half-input">
-            <label for="lname" class="form-label">Last Name</label>
-            <input type="text" id="lname" name="lname" class="form-control"  >
+            <label for="lastname" class="form-label">Last Name<span style="color:red"> *</span></label>
+            <input type="text" id="lastname" name="lastname" class="form-control"  required>
         </div>
         <div class="form-input full-input">
-            <label for="login" class="form-label">Email</label>
-            <input type="text" id="login" name="login" class="form-control"  >
+            <label for="username" class="form-label">Email<span style="color:red"> *</span></label>
+            <input type="text" id="username" name="username" class="form-control"  required>
         </div>
         <div class="form-input full-input">
-            <label for="password" class="form-label">Password</label>
-            <input type="password" id="password" name="password" class="form-control" >
+            <label for="password" class="form-label">Password<span style="color:red"> *</span></label>
+            <input type="password" id="password" name="password" class="form-control" required>
         </div>
         <div class="form-input half-input">
-            <label for="mobile" class="form-label">Phone Number</label>
-            <input type="text" id="mobile" name="mobile" class="form-control" >
+            <label for="phone" class="form-label">Phone Number<span style="color:red"> *</span></label>
+            <input type="text" id="phone" name="phone" class="form-control" required>
         </div>
         <div class="form-input half-input">
-            <label for="dob" class="form-label">Date of birth</label>
-            <input type="date" id="dob" name="dob" class="form-control" >
+            <label for="dob" class="form-label">Date of birth<span style="color:red"> *</span></label>
+            <input type="date" id="dob" name="dob" class="form-control" required>
         </div>
 
     </div>
@@ -50,5 +54,29 @@
     </a>
 </form>
 <?php require_once('footer.php'); ?>
+<script>
+$("#registration-form").submit(function (e){
+  e.preventDefault(); // prevent the default action for the form
+  var values = getFormData($(this)); // the form values
+  values.action = "register";
+  console.log(values);
+  $.ajax('api.php', {
+      type: 'POST',  // http method
+      data: values,  // data to submit
+      success: function (data, status, xhr) {
+          var data=JSON.parse(data);
+          console.log(data);
+          if(data.correct) {
+              window.location.href = "/";
+          }else{
+            $(".error").html(data.msg);
+          }
+      },
+      error: function (jqXhr, textStatus, errorMessage) {
+              console.log('Error' + errorMessage);
+      }
+  });
+})
+</script>
 </body>
 </html>
