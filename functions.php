@@ -193,6 +193,29 @@ function insert_product($label, $price, $pdate, $picture, $id_category, $id_owne
   return $response;
 }
 
+function get_product_image($id){
+  $product = get_product_by_id($id);
+  return $product['picture'];
+}
+
+function update_product($id, $data){ // data should contain the edited files
+  global $conn;
+  $response = array();
+  $correct = true;
+  foreach($data as $key => $val){
+    $stmt = $conn->prepare("UPDATE products set $key=:$key where id=:id");
+    $stmt->bindParam(":$key", $val);
+    $stmt->bindParam(":id", $id);
+    $status = $stmt->execute();
+    $correct = $correct && $status;
+    $response["updated"][] = array(
+      $key=>$val
+    );
+  }
+  $response["correct"] = $correct;
+  return $response;
+}
+
 function get_current_user_products(){
   global $conn;
   $response = array();
@@ -214,5 +237,33 @@ function get_category_by_id($id){
   $stmt->execute();
   $result = $stmt->fetch();
   return $result;
+}
 
+function get_product_by_id($id){
+  global $conn;
+  $response = array();
+  $stmt = $conn->prepare("SELECT * FROM products WHERE id=:id");
+  $stmt->bindParam(':id', $id);
+  $stmt->execute();
+  $result = $stmt->fetch();
+  $result['category'] = get_category_by_id($result['id_category']);
+  $result['id'] = $id;
+  return $result;
+}
+
+function delete_product_by_id($id){
+  global $conn;
+  $response = array();
+  $product = get_product_by_id($id);
+  $stmt = $conn->prepare("DELETE FROM products WHERE id=:id");
+  $stmt->bindParam(':id', $id);
+  $status = $stmt->execute();
+  // deleting the product image
+  $img_path = $product['picture'];
+  unlink(__DIR__.$img_path); 
+  $response = array(
+    "correct"=>true,
+    "msg"=>"Product deleted successfully"
+  );
+  return $response;
 }
